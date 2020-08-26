@@ -122,6 +122,10 @@ clock.on('tick', async () => {
           bets.push(gamePk);
           break;
         }
+        if (bets.indexOf(gamePk) === -1 && (homeRuns && awayRuns === 0 || awayRuns && homeRuns === 0)) {
+          bets.push(gamePk);
+          break;
+        }
         curInning++;
       }
     }
