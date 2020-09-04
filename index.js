@@ -4,13 +4,6 @@ const Clock = require('interval-clock');
 const sgMail = require('@sendgrid/mail');
 require('dotenv').config();
 
-setTimeout(() => {
-  console.log('Running...');
-  console.log('Emails in play:');
-  console.log(process.env.TO_EMAILS); 
-}, 2000);
-
-
 const bets = [];
 
 const api_key = process.env.API_KEY;
@@ -90,6 +83,7 @@ const getLiveLineScore = (url) => {
 /* Main program */ 
 const clock = Clock('2m');
 clock.on('tick', async () => {
+  console.log(process.env.TO_EMAILS);
   const todaysDate = new Date();
   const todaysScheduleUrl = scheduleUrl(formatDate(todaysDate));
   let schedule;
