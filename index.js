@@ -4,9 +4,12 @@ const Clock = require('interval-clock');
 const sgMail = require('@sendgrid/mail');
 require('dotenv').config();
 
-console.log('Running...');
-console.log('Emails in play:');
-console.log(process.env.TO_EMAILS);
+setTimeout(() => {
+  console.log('Running...');
+  console.log('Emails in play:');
+  console.log(process.env.TO_EMAILS); 
+}, 2000);
+
 
 const bets = [];
 
