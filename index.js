@@ -7,10 +7,21 @@ require('dotenv').config();
 const bets = [];
 
 const api_key = process.env.API_KEY;
-const sendMail = (teamName, mailer, key) => {
+
+const getAllEmails = (emailsStr) => {
+  return emailsStr.split(',');
+}
+
+const sendAllEmails = (emails, teamName, mailer, key) => {
+  for (const email of emails) {
+    sendMail(email, teamName, mailer, key);
+  }
+}
+
+const sendMail = (email, teamName, mailer, key) => {
   mailer.setApiKey(key);
   const msg = {
-    to: process.env.TO_EMAIL,
+    to: email,
     from: process.env.FROM_EMAIL,
     subject: 'There is an opportunity',
     text: `You need to bet on ${teamName}`,
@@ -110,7 +121,7 @@ clock.on('tick', async () => {
           console.log('homeruns', homeRuns, 'visruns', awayRuns);
           console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
           console.log('Visitor will win, Bet on', awayTeamName);
-          sendMail(awayTeamName, sgMail, api_key);
+          sendAllEmails(getAllEmails(process.env.TO_EMAILS), awayTeamName, sgMail, api_key);
           bets.push(gamePk);
           break;
         }
@@ -118,7 +129,7 @@ clock.on('tick', async () => {
           console.log('homeruns', homeRuns, 'visruns', awayRuns);
           console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
           console.log('Home will win, Bet on', homeTeamName);
-          sendMail(homeTeamName, sgMail, api_key);
+          sendAllEmails(getAllEmails(process.env.TO_EMAILS), homeTeamName, sgMail, api_key);
           bets.push(gamePk);
           break;
         }
