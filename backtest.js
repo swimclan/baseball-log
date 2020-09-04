@@ -109,16 +109,24 @@ const processGames = () => {
     for (let i=0; i<scoreline.length; i=i+2) {
       if (i >= +process.argv[4]) break;
       const inning = {vis: scoreline[i], hom: scoreline[i+1]};
-      if (inning.vis && !inning.hom && visWins > homeWins) {
-        predictor = 'visitor';
-      } else if (inning.hom && !inning.vis && homeWins > visWins) {
-        predictor = 'home';
+      if (inning.vis && !inning.hom) {
+        visWins > homeWins && (predictor = 'visitor');
+        break;
+      } else if (inning.hom && !inning.vis) {
+        homeWins > visWins && (predictor = 'home');
+        break;
       }
     };
     
     if (actual.home > actual.vis && predictor === 'home') {
+      console.log(visline.join(' '));
+      console.log(homeline.join(' '));
+      console.log('=========================');
       correctcount++;
     } else if (actual.vis > actual.home && predictor === 'visitor') {
+      console.log(visline.join(' '));
+      console.log(homeline.join(' '));
+      console.log('=========================');
       correctcount++;
     }
 
