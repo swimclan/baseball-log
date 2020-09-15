@@ -72,7 +72,7 @@ const processGames = () => {
   const games = outstring.split('\n').filter(game => game);
 
   const randomSample = [];
-  for (let g=0; g<100; g++) {
+  for (let g=0; g<1000; g++) {
     const rand = Math.floor(Math.random() * games.length);
     randomSample.push(games[rand]);
   }
@@ -105,28 +105,24 @@ const processGames = () => {
     }, {home: 0, vis: 0});
 
     let predictor = null;
-
+    let currentInning = 1;
+    let visScore = 0; let homeScore = 0;
     for (let i=0; i<scoreline.length; i=i+2) {
-      if (i >= +process.argv[4]) break;
-      const inning = {vis: scoreline[i], hom: scoreline[i+1]};
-      if (inning.vis && !inning.hom) {
-        visWins > homeWins && (predictor = 'visitor');
-        break;
-      } else if (inning.hom && !inning.vis) {
-        homeWins > visWins && (predictor = 'home');
+      const endInning = +process.argv[4] || 4;
+      if (currentInning > endInning) {
+        // visScore === homeScore && visWins > homeWins && (predictor = 'visitor');
+        (homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeWins > visWins + 2 && (predictor = 'home');
+        // homeScore === visScore && (predictor = 'home');
         break;
       }
+      visScore += scoreline[i];
+      homeScore += scoreline[i+1];
+      currentInning++;
     };
     
     if (actual.home > actual.vis && predictor === 'home') {
-      console.log(visline.join(' '));
-      console.log(homeline.join(' '));
-      console.log('=========================');
       correctcount++;
     } else if (actual.vis > actual.home && predictor === 'visitor') {
-      console.log(visline.join(' '));
-      console.log(homeline.join(' '));
-      console.log('=========================');
       correctcount++;
     }
 
@@ -137,13 +133,13 @@ const processGames = () => {
   const percent = correctcount / opportunities;
   percentLog.push(percent);
 
-  console.log(percent);
+  // console.log(`Opportunities: ${opportunities}\nPercent: ${percent}`);
 
-  // console.log('GAMES:', games.length);
-  // console.log('OPPORTUNITIES:', opportunities);
-  // console.log('CORRECTS:', correctcount);
-  // console.log('YEAR:', year, '% PREDICTIVE:', percent);
-  // console.log('=====================================================================================');
+  console.log('GAMES:', games.length);
+  console.log('OPPORTUNITIES:', opportunities);
+  console.log('CORRECTS:', correctcount);
+  console.log('YEAR:', year, '% PREDICTIVE:', percent);
+  console.log('=====================================================================================');
 }
 
 request.get(`https://www.retrosheet.org/gamelogs/gl${year}.zip`)

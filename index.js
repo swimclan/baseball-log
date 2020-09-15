@@ -115,30 +115,23 @@ clock.on('tick', async () => {
       }
       const lineScore = get(gameData, 'liveData.linescore.innings', []);
       let curInning = 1;
+      let visScore = 0, homeScore = 0;
       for (const inning of lineScore) {
-        if (curInning > 3) { break; }
         const awayRuns = get(inning, 'away.runs', null);
         const homeRuns = get(inning, 'home.runs', null);
-        console.log(awayRuns, 'to', homeRuns);
-        if (bets.indexOf(gamePk) === -1 && awayRuns && homeRuns === 0 && awayTeamWins > homeTeamWins) {
-          console.log('homeruns', homeRuns, 'visruns', awayRuns);
-          console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
-          console.log('Visitor will win, Bet on', awayTeamName);
-          sendAllEmails(getAllEmails(process.env.TO_EMAILS), awayTeamName, sgMail, api_key);
-          bets.push(gamePk);
-          break;
-        }
-        if (bets.indexOf(gamePk) === -1 && homeRuns && awayRuns === 0 && homeTeamWins > awayTeamWins) {
-          console.log('homeruns', homeRuns, 'visruns', awayRuns);
-          console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
-          console.log('Home will win, Bet on', homeTeamName);
-          sendAllEmails(getAllEmails(process.env.TO_EMAILS), homeTeamName, sgMail, api_key);
-          bets.push(gamePk);
-          break;
-        }
-        if (bets.indexOf(gamePk) === -1 && (homeRuns && awayRuns === 0 || awayRuns && homeRuns === 0)) {
-          bets.push(gamePk);
-          break;
+        if (homeRuns !== null && awayRuns !== null) {
+          visScore += awayRuns;
+          homeScore += homeRuns;
+          if (curInning === 5) {
+            if (bets.indexOf(gamePk) === -1 && (homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeTeamWins > awayTeamWins + 2) {
+              console.log('home score:', homeScore, 'vis score:', visScore);
+              console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
+              console.log('Home will win, Bet on', homeTeamName);
+              sendAllEmails(getAllEmails(process.env.TO_EMAILS), homeTeamName, sgMail, api_key);
+              bets.push(gamePk);
+            }
+            break;
+          }
         }
         curInning++;
       }
