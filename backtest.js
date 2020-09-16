@@ -63,16 +63,19 @@ function getAllGamesForTeam(currDate, team, games) {
 for (let i = +process.argv[2]; i<= +process.argv[3]; i++) {
   years.push(i);
 }
+
 for (const year of years) {
-const writeStream = fs.createWriteStream('file');
 let outstring = '';
-const processGames = () => {
+const processGames = (depth = 0) => {
+  if (depth === 100) {
+    return;
+  }
   let correctcount = 0;
   let opportunities = 0;
   const games = outstring.split('\n').filter(game => game);
 
   const randomSample = [];
-  for (let g=0; g<1000; g++) {
+  for (let g=0; g<300; g++) {
     const rand = Math.floor(Math.random() * games.length);
     randomSample.push(games[rand]);
   }
@@ -107,17 +110,18 @@ const processGames = () => {
     let predictor = null;
     let currentInning = 1;
     let visScore = 0; let homeScore = 0;
-    for (let i=0; i<scoreline.length; i=i+2) {
-      const endInning = +process.argv[4] || 4;
-      if (currentInning > endInning) {
-        // visScore === homeScore && visWins > homeWins && (predictor = 'visitor');
-        (homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeWins > visWins + 2 && (predictor = 'home');
-        // homeScore === visScore && (predictor = 'home');
-        break;
-      }
+    for (let i=0; i<scoreline.length - 1; i=i+2) {
       visScore += scoreline[i];
       homeScore += scoreline[i+1];
+      const endInning = +process.argv[4] || 4;
+      if ((homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeWins > visWins + 2) {
+        predictor = 'home';
+        break;
+      }
       currentInning++;
+      if (currentInning > endInning) {
+        break;
+      }
     };
     
     if (actual.home > actual.vis && predictor === 'home') {
@@ -133,13 +137,14 @@ const processGames = () => {
   const percent = correctcount / opportunities;
   percentLog.push(percent);
 
-  // console.log(`Opportunities: ${opportunities}\nPercent: ${percent}`);
-
   console.log('GAMES:', games.length);
   console.log('OPPORTUNITIES:', opportunities);
   console.log('CORRECTS:', correctcount);
   console.log('YEAR:', year, '% PREDICTIVE:', percent);
   console.log('=====================================================================================');
+  fs.writeFileSync('file', `${percent}\n`, {flag: 'a'});
+
+  processGames(depth + 1);
 }
 
 request.get(`https://www.retrosheet.org/gamelogs/gl${year}.zip`)
@@ -151,7 +156,6 @@ request.get(`https://www.retrosheet.org/gamelogs/gl${year}.zip`)
         outstring += rawdata;
       })
       .on('end', processGames);
-    entry.pipe(writeStream)
   });
 
 }

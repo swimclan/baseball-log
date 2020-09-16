@@ -122,18 +122,17 @@ clock.on('tick', async () => {
         if (homeRuns !== null && awayRuns !== null) {
           visScore += awayRuns;
           homeScore += homeRuns;
-          if (curInning === 5) {
-            if (bets.indexOf(gamePk) === -1 && (homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeTeamWins > awayTeamWins + 2) {
-              console.log('home score:', homeScore, 'vis score:', visScore);
-              console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
-              console.log('Home will win, Bet on', homeTeamName);
-              sendAllEmails(getAllEmails(process.env.TO_EMAILS), homeTeamName, sgMail, api_key);
-              bets.push(gamePk);
-            }
+          if ((bets.indexOf(gamePk) === -1 && (homeScore === visScore || homeScore === visScore - 1) && homeScore > 0 && homeTeamWins > awayTeamWins + 2)) {
+            console.log('home score:', homeScore, 'vis score:', visScore);
+            console.log('homewins', homeTeamWins, 'viswins', awayTeamWins);
+            console.log('Home will win, Bet on', homeTeamName);
+            sendAllEmails(getAllEmails(process.env.TO_EMAILS), homeTeamName, sgMail, api_key);
+            bets.push(gamePk);
             break;
           }
         }
         curInning++;
+        if (curInning > 5) break;
       }
     }
   };
